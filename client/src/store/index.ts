@@ -12,6 +12,7 @@ import rootSaga from "./sagas";
 import { loadState } from "../utils/sessionStorage";
 // import { throttle } from 'lodash';
 import { Loading } from "./Loading/reducer";
+import { Tasks } from "./Tasks/reducer";
 
 const sagaMiddleware = createSagaMiddleware();
 
@@ -20,6 +21,7 @@ export const store = configureStore({
     ErrorInterceptorModal,
     auth,
     Loading,
+    Tasks,
   },
   middleware: [sagaMiddleware],
   preloadedState: loadState(),

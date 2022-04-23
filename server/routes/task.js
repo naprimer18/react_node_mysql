@@ -1,6 +1,5 @@
 import { Router } from 'express';
 import { connection } from '../db/index.js'
-import Message from '../models/message.js';
 const router = Router();
 
 router.post('/addTask', async (req, res) => {
@@ -10,6 +9,15 @@ router.post('/addTask', async (req, res) => {
       }
       return res.status(201).json({message: 'Message Was Saved !'})
     });
+})
+
+router.put('/editTask', async (req, res) => {
+  connection.query(`update tasks set name = ? where id=?`,[req.body.name, req.body.id],(err, results, fields) => {
+    if(err) {
+      return res.status(500).json({message: 'Something wrong !'})
+    }
+    return res.status(201).json({names: results})
+  })
 })
 
 router.delete('/deleteTask', async (req, res) => {

@@ -1,21 +1,22 @@
 
 import express from 'express'
-import taskRouter from './routes/task.js'
-import userRouter from './routes/user.js'
-import path,{dirname } from 'path'
+import cors from "cors"
+import path, { dirname } from 'path'
 import { fileURLToPath } from 'url';
 import { connection } from './db/index.js';
+
+//Routes
+import taskRouter from './routes/task.js'
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-
 const app = express();
 const PORT = 3001;
 
+app.use(cors())
 app.use(express.json({ extended: true }))
 app.use('/api', taskRouter)
-app.use('/api', userRouter)
 
 if (process.env.NODE_ENV === 'production') {
   app.use('/', express.static(path.join(__dirname, 'client', 'build')))

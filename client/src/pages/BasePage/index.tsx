@@ -1,60 +1,51 @@
 import React, { useEffect, useState } from "react";
-// import { useDispatch } from "react-redux";
-// import { logoutAction } from '../../store/Auth/actions';
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../../store";
+import {
+  addTaskAction,
+  deleteTaskAction,
+  getTasksAction,
+  editTaskAction,
+} from "../../store/Tasks/actions";
+import { ITask } from "../../store/Tasks/models";
+
 //styles
 import style from "./styles/index.module.scss";
 
 export const BasePage = () => {
+  const dispatch = useDispatch();
+  const tasksCollection = useSelector(
+    (store: RootState) => store.Tasks.collection
+  );
   const [currentTask, setCurrentTask] = useState("");
-  const [tasks, setTasks] = useState([]);
-  // const dispatch = useDispatch();
-  const addMessage = async () => {
-    if (currentTask) {
-      const method = "POST";
-      const body = JSON.stringify({ name: currentTask });
-      const response = await fetch("/api/addTask", {
-        method,
-        body,
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      const data = await response.json();
-      console.log("data ", data);
-      getAllTask();
-      setCurrentTask("");
-    }
-  };
-
-  const getAllTask = async () => {
-    const method = "GET";
-    const requets = await fetch("/api/getAllTasks", { method });
-    const data = await requets.json();
-    console.log(data);
-    setTasks(data.names);
-  };
+  const [editableTask, setEditableTask] = useState<{
+    name: string,
+    id: number,
+  }>({
+    name: "",
+    id: 0,
+  });
 
   useEffect(() => {
-    getAllTask();
+    dispatch(getTasksAction());
   }, []);
+
+  const onAddMessage = async () => {
+    dispatch(addTaskAction(currentTask));
+    setCurrentTask("");
+  };
+
+  const onDeleteTask = async (id: number) => {
+    dispatch(deleteTaskAction(JSON.stringify(id)));
+  };
+
+  const onEditTask = async () => {
+    setEditableTask({ id: 0, name: "" });
+    dispatch(editTaskAction(editableTask));
+  };
 
   const refreshCurrentMessage = (e: any) => {
     setCurrentTask(e.target.value);
-  };
-
-  const deleteTask = async (id: any) => {
-    const method = "DELETE";
-    const body = JSON.stringify({ id });
-    const requets = await fetch("/api/deleteTask", {
-      method,
-      body,
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    const data = await requets.json();
-    getAllTask();
-    console.log(data.names);
   };
 
   return (
@@ -68,20 +59,45 @@ export const BasePage = () => {
           value={currentTask}
           onChange={refreshCurrentMessage}
         />
-        <button className={style.addTaskButton} onClick={addMessage}>
+        <button className={style.addTaskButton} onClick={onAddMessage}>
           Add
         </button>
       </div>
-      {tasks.length
-        ? tasks.map((item: any) => (
+      {tasksCollection.length
+        ? tasksCollection.map((item: ITask) => (
             <div key={item.id} className={style.taskListContainer}>
               <button
                 className={style.deleteTaskButton}
-                onClick={() => deleteTask(item.id)}
+                onClick={() => onDeleteTask(item.id)}
               >
                 X
               </button>
-              <div className={style.taskListItem}>{item.name}</div>
+              <button
+                className={style.deleteTaskButton}
+                onClick={() =>
+                  setEditableTask({ name: item.name, id: item.id })
+                }
+              >
+                edit
+              </button>
+              {item.id === editableTask.id ? (
+                <>
+                  <input
+                    value={editableTask.name}
+                    onChange={e =>
+                      setEditableTask({ ...editableTask, name: e.target.value })
+                    }
+                  />
+                  <button
+                    className={style.deleteTaskButton}
+                    onClick={onEditTask}
+                  >
+                    save
+                  </button>
+                </>
+              ) : (
+                <div className={style.taskListItem}>{item.name}</div>
+              )}
             </div>
           ))
         : null}

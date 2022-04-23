@@ -1,5 +1,16 @@
-import { all } from "redux-saga/effects";
+import { all, fork } from "redux-saga/effects";
+import {
+  addTaskWatcher,
+  deleteTaskWatcher,
+  getTasksWatcher,
+  editTaskWatcher,
+} from "./Tasks/sagas";
 
 export default function* rootSaga() {
-  yield all([]);
+  yield all([
+    fork(getTasksWatcher),
+    fork(addTaskWatcher),
+    fork(deleteTaskWatcher),
+    fork(editTaskWatcher),
+  ]);
 }
