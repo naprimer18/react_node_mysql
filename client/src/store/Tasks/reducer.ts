@@ -8,7 +8,7 @@ const initialState: IInitialState = {
 export const Tasks = (store = initialState, action: any) => {
   switch (action.type) {
     case GET_TASKS: {
-      return { ...store, collection: action.payload.names };
+      return { ...store, collection: action.payload };
     }
     default: {
       return store;
