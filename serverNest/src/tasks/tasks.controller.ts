@@ -19,11 +19,11 @@ export class TasksController {
 
   @Delete('deleteTask')
   deleteTask(@Body() body) {
-    return this.tasksService.deleteTask(body);
+    return this.tasksService.removeTask(body);
   }
 
   @Put('editTask')
   editTask(@Body() body) {
-    return this.tasksService.editTask(body);
+    return this.tasksService.editTask(body.id, body);
   }
 }

@@ -1,3 +1,4 @@
+import { gql, useMutation, useQuery } from "@apollo/client";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../store";
@@ -12,7 +13,46 @@ import { ITask } from "../../store/Tasks/models";
 //styles
 import style from "./styles/index.module.scss";
 
+// const EXCHANGE_RATES = gql`
+//   query GetExchangeRates {
+//     rates(currency: "USD") {
+//       currency
+//       rate
+//     }
+//   }
+// `;
+
+const GET_TASKS = gql`
+  query GET_T {
+    getAllTasks {
+      name
+      id
+    }
+  }
+`;
+
+const ADD_TASKS = gql`
+  mutation ADD_T($name: String!) {
+    addTask(name: $name) {	
+     id,
+     name
+   }
+  }
+`;
+
+const DELETE_TASK = gql`
+  mutation REMOVE_T($id: Float!) {
+    removeTask(id: $id) {	
+     name
+   }
+  }
+`;
+
 export const BasePage = () => {
+  const { data, refetch } = useQuery(GET_TASKS);
+  const [addTask] = useMutation(ADD_TASKS);
+  const [removeTask, error] = useMutation(DELETE_TASK);
+  console.log("data ", data, "error ", error);
   const dispatch = useDispatch();
   const tasksCollection = useSelector(
     (store: RootState) => store.Tasks.collection
@@ -26,17 +66,21 @@ export const BasePage = () => {
     id: 0,
   });
 
-  useEffect(() => {
-    dispatch(getTasksAction());
-  }, []);
+  // useEffect(() => {
+  //   dispatch(getTasksAction());
+  // }, []);
 
   const onAddMessage = async () => {
-    dispatch(addTaskAction(currentTask));
+    await addTask({ variables: { name: currentTask } });
+    await refetch();
     setCurrentTask("");
   };
 
-  const onDeleteTask = async (id: number) => {
-    dispatch(deleteTaskAction(JSON.stringify(id)));
+  const onDeleteTask = async (itemId: number) => {
+    console.log("id ", itemId); 
+    await removeTask({ variables: { id: itemId } })
+    await refetch();
+    // dispatch(deleteTaskAction(JSON.stringify(id)));
   };
 
   const onEditTask = async () => {
@@ -63,8 +107,8 @@ export const BasePage = () => {
           Add
         </button>
       </div>
-      {tasksCollection.length
-        ? tasksCollection.map((item: ITask) => (
+      {data?.getAllTasks.length
+        ? data.getAllTasks.map((item: ITask) => (
             <div key={item.id} className={style.taskListContainer}>
               <button
                 className={style.deleteTaskButton}

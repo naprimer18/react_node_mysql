@@ -9,6 +9,15 @@ import { Integrations } from "@sentry/tracing";
 import { Provider } from "react-redux";
 import { store } from "./store";
 
+//graphql
+import {
+  ApolloClient,
+  InMemoryCache,
+  ApolloProvider,
+  useQuery,
+  gql,
+} from "@apollo/client";
+
 // Component
 import App from "./AppConfig";
 
@@ -18,6 +27,10 @@ import "./commonStyles/_reset.module.scss";
 import "./commonStyles/_common.module.scss";
 import "./commonStyles/main.module.scss";
 
+const client = new ApolloClient({
+  uri: "http://localhost:8080/graphql",
+  cache: new InMemoryCache(),
+});
 const rootElement = document.getElementById("root");
 
 init({
@@ -28,8 +41,10 @@ init({
 });
 
 ReactDOM.render(
-  <Provider store={store}>
-    <App />
-  </Provider>,
+  <ApolloProvider client={client}>
+    <Provider store={store}>
+      <App />
+    </Provider>
+  </ApolloProvider>,
   rootElement
 );
